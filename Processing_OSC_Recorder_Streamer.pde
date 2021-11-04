@@ -13,14 +13,15 @@ NetAddress myRemoteLocation;
 
 void setup() {
   size(800, 800);
-  oscP5 = new OscP5(this, 9999);
   currentSample = new JSONArray();
   
   /* CONFIGURE APPLICATION HERE */
   MODE = STREAMING; // RECORDING or STREAMING  
   FILE_NAME = "dancing";
+  int PORT_LISTENING = 9999;
   /* DON'T TOUCH ANYTHING ABOVE THIS LINE :) */
   
+  oscP5 = new OscP5(this, PORT_LISTENING);  
   if(MODE == RECORDING) json = new JSONObject();  
   else if(MODE == STREAMING) json = loadJSONObject("data/"+FILE_NAME+".json");
 }
