@@ -17,8 +17,8 @@ void setup() {
   currentSample = new JSONArray();
   
   /* CONFIGURE APPLICATION HERE */
-  MODE = RECORDING;  
-  FILE_NAME = "data";
+  MODE = STREAMING; // RECORDING or STREAMING  
+  FILE_NAME = "dancing";
   /* DON'T TOUCH ANYTHING ABOVE THIS LINE :) */
   
   if(MODE == RECORDING) json = new JSONObject();  
@@ -42,21 +42,22 @@ void draw() {
   // ------------------------------
   
   if(MODE == STREAMING){
-    JSONArray sample = json.getJSONArray(millis()+"");
-    println(sample);
-    if(sample!=null){
-      for(int i=0; i<sample.size(); i++){
-        JSONObject message = sample.getJSONObject(i);
-        OscMessage myMessage = new OscMessage(message.getString("title"));
-        myRemoteLocation = new NetAddress(message.getString("ipAddress"),message.getInt("port"));
-        oscP5.send(myMessage, myRemoteLocation); 
+    for(int j=millis; j<millis(); j++){
+      JSONArray sample = json.getJSONArray(j+"");
+      if(sample!=null){
+        for(int i=0; i<sample.size(); i++){
+          JSONObject message = sample.getJSONObject(i);
+          OscMessage myMessage = new OscMessage(message.getString("title"));
+          myRemoteLocation = new NetAddress(message.getString("ipAddress"),message.getInt("port"));
+          oscP5.send(myMessage, myRemoteLocation); 
+        }
       }
     }
+    millis = millis();
   }
 }
 
 void oscEvent(OscMessage m) {
-  println(m);
   if(playing){
     if(millis==millis()){
       currentSample.setJSONObject(sampleL, oscToJson(m));
@@ -75,7 +76,6 @@ JSONObject oscToJson(OscMessage message){
   String typeTag = message.typetag();
   String msgString = message + "";
   String[] splited = msgString.split(" ", 10);
-  println(splited[2]);
   //obj.setString("message", msgString);
   //obj.setInt("addressInt", message.addrInt());
   obj.setString("ipAddress", splited[0].substring(1,10));
