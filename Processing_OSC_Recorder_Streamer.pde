@@ -5,16 +5,24 @@ JSONObject json;
 int millis = 0;
 JSONArray currentSample;
 int sampleL = 0;
+String FILE_NAME;
 boolean playing = true;
 int MODE;
+NetAddress myRemoteLocation;
 
 void setup() {
   size(800, 800);
   oscP5 = new OscP5(this, 9999);
-  json = new JSONObject();  
   currentSample = new JSONArray();
+  myRemoteLocation = new NetAddress("127.0.0.1",12000);
   
-  int MODE = RECORDING;  
+  /* CONFIGURE APPLICATION HERE */
+  MODE = STREAMING;  
+  FILE_NAME = "data";
+  /* DON'T TOUCH ANYTHING ABOVE THIS LINE :) */
+  
+  if(MODE == RECORDING) json = new JSONObject();  
+  else if(MODE == STREAMING) json = loadJSONObject("data/"+FILE_NAME+".json");
 }
 
 void draw() {
@@ -22,18 +30,34 @@ void draw() {
   if(playing) bg = color(0, 255, 0);
   else bg = color(255, 0, 0);
   background(bg);
+  
+  // ------------------------------
+  
+  if(MODE == STREAMING){
+    JSONArray sample = json.getJSONArray(millis()+"");
+    println(sample);
+    if(sample!=null){
+      for(int i=0; i<sample.size(); i++){
+        JSONObject message = sample.getJSONObject(i);
+        OscMessage myMessage = new OscMessage(message.getString("title"));
+        oscP5.send(myMessage, myRemoteLocation); 
+      }
+    }
+  }
 }
 
 void oscEvent(OscMessage m) {
-  if(playing){
-    if(millis==millis()){
-      currentSample.setJSONObject(sampleL, oscToJson(m));
-      sampleL++;
-    }else{
-      if(sampleL!=0) json.setJSONArray(millis + "", currentSample);
-      sampleL = 0;
-      currentSample = new JSONArray();
-      millis = millis();
+  if(MODE == RECORDING){
+    if(playing){
+      if(millis==millis()){
+        currentSample.setJSONObject(sampleL, oscToJson(m));
+        sampleL++;
+      }else{
+        if(sampleL!=0) json.setJSONArray(millis + "", currentSample);
+        sampleL = 0;
+        currentSample = new JSONArray();
+        millis = millis();
+      }
     }
   }
 }
@@ -65,6 +89,8 @@ JSONObject oscToJson(OscMessage message){
 }
 
 void mousePressed(){
-  if(playing) playing = false;
-  else saveJSONObject(json, "data/new.json");
+  if(MODE == RECORDING){
+    if(playing) playing = false;
+    else saveJSONObject(json, "data/"+FILE_NAME+".json");
+  }
 }
