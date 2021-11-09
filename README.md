@@ -6,7 +6,7 @@
 [FrameCount(int), JointType(int). XPosition(float), YPosition(float), ZPosition(float)]
 
 #### JointType Index
-(/img/Terminology.png)
+![Terminology](/img/Terminology.png)
 
-(/img/Index.png)
+![Index](/img/Index.png)
 
