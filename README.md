@@ -7,5 +7,8 @@
 
 #### JointType Index
 ![Terminology](/img/Terminology.png)
+
+
+
 ![Index](/img/Index.png)
 
