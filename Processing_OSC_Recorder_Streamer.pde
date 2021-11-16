@@ -16,10 +16,10 @@ void setup() {
   currentSample = new JSONArray();
   
   /* CONFIGURE APPLICATION HERE */
-  MODE = STREAMING; // RECORDING or STREAMING  
-  FILE_NAME = "dancing";
-  int PORT_LISTENING = 9999;
-  /* DON'T TOUCH ANYTHING ABOVE THIS LINE :) */
+  MODE =  RECORDING; // RECORDING or STREAMING  
+  FILE_NAME = "walking";
+  int PORT_LISTENING = 57121;
+  /* DON'T TOUCH ANYTHING ABOVE THIS LINE */
   
   oscP5 = new OscP5(this, PORT_LISTENING);  
   if(MODE == RECORDING) json = new JSONObject();  
@@ -38,7 +38,6 @@ void draw() {
   }else if(MODE==STREAMING){
     text("Streaming from file: " + FILE_NAME + ".json", 20, 40);
   }
-  
   
   // ------------------------------
   
@@ -59,17 +58,19 @@ void draw() {
 }
 
 void oscEvent(OscMessage m) {
+  
   if(playing){
-    if(millis==millis()){
-      currentSample.setJSONObject(sampleL, oscToJson(m));
-      sampleL++;
-    }else{
+    println("append");
+    currentSample.setJSONObject(sampleL, oscToJson(m));
+    sampleL++;
+    if(millis!=millis()){
+      println(m);
       if(sampleL!=0) json.setJSONArray(millis + "", currentSample);
       sampleL = 0;
       currentSample = new JSONArray();
       millis = millis();
     }
-  }
+  }    
 }
 
 JSONObject oscToJson(OscMessage message){
@@ -92,6 +93,9 @@ JSONObject oscToJson(OscMessage message){
       case 'f':
         float value = message.get(i).floatValue();
         arguments.setFloat(i, value);
+      case 's':
+        String stringValue = message.get(i).stringValue();
+        arguments.setString(i, stringValue);
     }
   }
   obj.setJSONArray("arguments", arguments);
@@ -109,6 +113,7 @@ void mousePressed(){
     else
     {
       saveJSONObject(json, "data/"+FILE_NAME+".json");
+      println("SAVED");
       recorded = true;
     }   
   }
